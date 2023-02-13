@@ -22,7 +22,7 @@ class RwlGNN:
         'cpu' or 'cuda'.
     Examples
     --------
-    See details in https://github.com/Bharat-Runwal/RWL-GNN.
+    See details in https://github.com/JasmeetSinghIITD/RWL-GNN.
     """
 
     def __init__(self, model, args, device):
