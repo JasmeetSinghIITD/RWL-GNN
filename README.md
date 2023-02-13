@@ -60,13 +60,3 @@ The code is based on :
 - DeepRobust [(https://github.com/DSE-MSU/DeepRobust)](https://github.com/DSE-MSU/DeepRobust)
 - [Pro-GNN](https://github.com/ChandlerBang/Pro-GNN)
 
-## Cite:
-
-```
-@article{runwal2022robust,
-  title={Robust Graph Neural Networks using Weighted Graph Laplacian},
-  author={Runwal, Bharat and Kumar, Sandeep and others},
-  journal={arXiv preprint arXiv:2208.01853},
-  year={2022}
-}
-```
