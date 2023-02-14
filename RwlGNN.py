@@ -370,7 +370,7 @@ class RwlGNN:
         Aw = Aw + Aw.t()
         row,col = np.diag_indices_from(Aw)
         Aw[row,col] = -Aw.sum(axis=1)
-        n,m=matrix.shape
+        n,m=Aw.shape
         for i in range(n):
           for j in range(m):
             Aw[i][j]=-Aw[i][j]
