@@ -353,8 +353,30 @@ class RwlGNN:
         Lw = Lw + Lw.t()
         row,col = np.diag_indices_from(Lw)
         Lw[row,col] = -Lw.sum(axis=1)
-        return Lw     
-
+        return Lw    
+    
+    
+    def Adj(self,weight=None):
+        if weight==None:
+            k= len(self.weight)
+            a = self.weight 
+        else:
+            k = len(weight)
+            a = weight
+        n = int(0.5*(1+ np.sqrt(1+8*k)))
+        Aw = torch.zeros((n,n),device=self.device)
+        b=torch.triu_indices(n,n,1)
+        Aw[b[0],b[1]] = -a  
+        Aw = Aw + Aw.t()
+        row,col = np.diag_indices_from(Aw)
+        Aw[row,col] = -Aw.sum(axis=1)
+        n,m=matrix.shape
+        for i in range(n):
+          for j in range(m):
+            Aw[i][j]=-Aw[i][j]
+            if (i == j):
+                Aw[i][j] = 0
+        return Aw  
 
 
     def Linv(self,M):
