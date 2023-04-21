@@ -4,7 +4,7 @@ import argparse
 import numpy as np
 import torch
 
-from deeprobust.graph.defense import GCN
+from deeprobust.graph.defense import GraphSAGE
 from deeprobust.graph.data import Dataset, PrePtbDataset
 from deeprobust.graph.utils import preprocess, encode_onehot, get_train_val_test
 
@@ -107,7 +107,7 @@ if args.attack == 'meta' or args.attack == 'nettack':
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 
-model = GCN(nfeat=features.shape[1],
+model = GraphSAGE(nfeat=features.shape[1],
             nhid=args.hidden,
             nclass=labels.max().item() + 1,
             dropout=args.dropout, device=device)
