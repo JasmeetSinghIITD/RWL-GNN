@@ -246,43 +246,33 @@ class RwlGNN:
 
     def train_graphsage(self, epoch, features, adj, labels, idx_train, idx_val):
         args = self.args
-        adj = self.normalize(adj)
+        adj = self.normalize()
 
         t = time.time()
         self.model.train()
         self.optimizer.zero_grad()
 
-        # Sample neighbors for each node in the training set
-        nodes = np.asarray(idx_train)
-        neigh_dict = self.sample_neighbors(nodes)
+        # Create the GraphSAGE output by running the forward method of the GraphSAGE model
+        output = self.model(features, adj, self.idx_to_subgraph(idx_train))
 
-        # Create subgraphs for each node and its neighbors
-        subgraphs = []
-        for node, neighbors in neigh_dict.items():
-            subgraphs.append(self.create_subgraph(node, neighbors))
-
-        # Compute embeddings for each subgraph
-        embeddings = []
-        for subgraph in subgraphs:
-            sub_features = features[subgraph]
-            sub_adj = adj[subgraph][:, subgraph]
-            sub_embeddings = self.model(sub_features, sub_adj)
-            mean_embedding = torch.mean(sub_embeddings, dim=0)
-            embeddings.append(mean_embedding)
-
-        output = self.model.output_layer(torch.stack(embeddings))
+        # Compute the loss and accuracy for the training set
         loss_train = F.nll_loss(output, labels[idx_train])
         acc_train = accuracy(output, labels[idx_train])
+
+        # Backpropagate the loss and update the model parameters
         loss_train.backward()
         self.optimizer.step()
 
         # Evaluate validation set performance separately,
         # deactivates dropout during validation run.
         self.model.eval()
-        output = self.model(features, adj)
 
-        loss_val = F.nll_loss(output[idx_val], labels[idx_val])
-        acc_val = accuracy(output[idx_val], labels[idx_val])
+        # Create the GraphSAGE output for the validation set
+        output = self.model(features, adj, self.idx_to_subgraph(idx_val))
+
+        # Compute the loss and accuracy for the validation set
+        loss_val = F.nll_loss(output, labels[idx_val])
+        acc_val = accuracy(output, labels[idx_val])
 
         if acc_val > self.best_val_acc:
             self.best_val_acc = acc_val
