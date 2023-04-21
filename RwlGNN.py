@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from deeprobust.graph.utils import accuracy
+import scipy.sparse as sp
 import matplotlib.pyplot as plt
 import warnings
 from utils import *
