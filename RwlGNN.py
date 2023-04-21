@@ -24,6 +24,14 @@ class RwlGNN:
     --------
     See details in https://github.com/JasmeetSinghIITD/RWL-GNN.
     """
+    def normalize_adj(self, adj):
+        """Normalize adjacency matrix."""
+        adj = sp.coo_matrix(adj)
+        rowsum = np.array(adj.sum(1))
+        d_inv_sqrt = np.power(rowsum, -0.5).flatten()
+        d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.
+        d_mat_inv_sqrt = sp.diags(d_inv_sqrt)
+        return adj.dot(d_mat_inv_sqrt).transpose().dot(d_mat_inv_sqrt).tocoo()
 
     def __init__(self, model, args, device):
         self.device = device
