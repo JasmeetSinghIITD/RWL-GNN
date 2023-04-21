@@ -124,7 +124,7 @@ class RwlGNN:
 
                 for i in range(int(args.inner_steps)):
                     estimate_adj = self.A()
-                    self.train_gcn(epoch, features, estimate_adj,
+                    self.train_graphsage(epoch, features, estimate_adj,
                             labels, idx_train, idx_val)
 
                 # if args.decay == "y":
@@ -242,19 +242,36 @@ class RwlGNN:
 
                 
 
-    def train_gcn(self, epoch, features, adj, labels, idx_train, idx_val):
+    def train_graphsage(self, epoch, features, adj, labels, idx_train, idx_val):
         args = self.args
-        # estimator = self.estimator
-        adj = self.normalize()
+        adj = self.normalize_adj(adj)
 
         t = time.time()
         self.model.train()
         self.optimizer.zero_grad()
 
-        output = self.model(features, adj)
-        loss_train = F.nll_loss(output[idx_train], labels[idx_train])
-        acc_train = accuracy(output[idx_train], labels[idx_train])
-        loss_train.backward(retain_graph = True)
+        # Sample neighbors for each node in the training set
+        nodes = np.asarray(idx_train)
+        neigh_dict = self.sample_neighbors(nodes)
+
+        # Create subgraphs for each node and its neighbors
+        subgraphs = []
+        for node, neighbors in neigh_dict.items():
+            subgraphs.append(self.create_subgraph(node, neighbors))
+
+        # Compute embeddings for each subgraph
+        embeddings = []
+        for subgraph in subgraphs:
+            sub_features = features[subgraph]
+            sub_adj = adj[subgraph][:, subgraph]
+            sub_embeddings = self.model(sub_features, sub_adj)
+            mean_embedding = torch.mean(sub_embeddings, dim=0)
+            embeddings.append(mean_embedding)
+
+        output = self.model.output_layer(torch.stack(embeddings))
+        loss_train = F.nll_loss(output, labels[idx_train])
+        acc_train = accuracy(output, labels[idx_train])
+        loss_train.backward()
         self.optimizer.step()
 
         # Evaluate validation set performance separately,
